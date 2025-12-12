@@ -852,7 +852,8 @@ func (r *PythonGraderParam) UnmarshalJSON(data []byte) error {
 
 // A ScoreModelGrader object that uses a model to assign a score to the input.
 type ScoreModelGrader struct {
-	// The input text. This may include template strings.
+	// The input messages evaluated by the grader. Supports text, output text, input
+	// image, and input audio content blocks, and may include template strings.
 	Input []ScoreModelGraderInput `json:"input,required"`
 	// The model to use for the evaluation.
 	Model string `json:"model,required"`
@@ -1049,14 +1050,19 @@ type ScoreModelGraderSamplingParams struct {
 	MaxCompletionsTokens int64 `json:"max_completions_tokens,nullable"`
 	// Constrains effort on reasoning for
 	// [reasoning models](https://platform.openai.com/docs/guides/reasoning). Currently
-	// supported values are `minimal`, `low`, `medium`, and `high`. Reducing reasoning
-	// effort can result in faster responses and fewer tokens used on reasoning in a
-	// response.
+	// supported values are `none`, `minimal`, `low`, `medium`, `high`, and `xhigh`.
+	// Reducing reasoning effort can result in faster responses and fewer tokens used
+	// on reasoning in a response.
 	//
-	// Note: The `gpt-5-pro` model defaults to (and only supports) `high` reasoning
-	// effort.
+	//   - `gpt-5.1` defaults to `none`, which does not perform reasoning. The supported
+	//     reasoning values for `gpt-5.1` are `none`, `low`, `medium`, and `high`. Tool
+	//     calls are supported for all reasoning values in gpt-5.1.
+	//   - All models before `gpt-5.1` default to `medium` reasoning effort, and do not
+	//     support `none`.
+	//   - The `gpt-5-pro` model defaults to (and only supports) `high` reasoning effort.
+	//   - `xhigh` is supported for all models after `gpt-5.1-codex-max`.
 	//
-	// Any of "minimal", "low", "medium", "high".
+	// Any of "none", "minimal", "low", "medium", "high", "xhigh".
 	ReasoningEffort shared.ReasoningEffort `json:"reasoning_effort,nullable"`
 	// A seed value to initialize the randomness, during sampling.
 	Seed int64 `json:"seed,nullable"`
@@ -1086,7 +1092,8 @@ func (r *ScoreModelGraderSamplingParams) UnmarshalJSON(data []byte) error {
 //
 // The properties Input, Model, Name, Type are required.
 type ScoreModelGraderParam struct {
-	// The input text. This may include template strings.
+	// The input messages evaluated by the grader. Supports text, output text, input
+	// image, and input audio content blocks, and may include template strings.
 	Input []ScoreModelGraderInputParam `json:"input,omitzero,required"`
 	// The model to use for the evaluation.
 	Model string `json:"model,required"`
@@ -1297,14 +1304,19 @@ type ScoreModelGraderSamplingParamsParam struct {
 	TopP param.Opt[float64] `json:"top_p,omitzero"`
 	// Constrains effort on reasoning for
 	// [reasoning models](https://platform.openai.com/docs/guides/reasoning). Currently
-	// supported values are `minimal`, `low`, `medium`, and `high`. Reducing reasoning
-	// effort can result in faster responses and fewer tokens used on reasoning in a
-	// response.
+	// supported values are `none`, `minimal`, `low`, `medium`, `high`, and `xhigh`.
+	// Reducing reasoning effort can result in faster responses and fewer tokens used
+	// on reasoning in a response.
 	//
-	// Note: The `gpt-5-pro` model defaults to (and only supports) `high` reasoning
-	// effort.
+	//   - `gpt-5.1` defaults to `none`, which does not perform reasoning. The supported
+	//     reasoning values for `gpt-5.1` are `none`, `low`, `medium`, and `high`. Tool
+	//     calls are supported for all reasoning values in gpt-5.1.
+	//   - All models before `gpt-5.1` default to `medium` reasoning effort, and do not
+	//     support `none`.
+	//   - The `gpt-5-pro` model defaults to (and only supports) `high` reasoning effort.
+	//   - `xhigh` is supported for all models after `gpt-5.1-codex-max`.
 	//
-	// Any of "minimal", "low", "medium", "high".
+	// Any of "none", "minimal", "low", "medium", "high", "xhigh".
 	ReasoningEffort shared.ReasoningEffort `json:"reasoning_effort,omitzero"`
 	paramObj
 }
