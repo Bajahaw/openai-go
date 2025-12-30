@@ -1,5 +1,40 @@
 # Changelog
 
+## 3.15.0 (2025-12-19)
+
+Full Changelog: [v3.14.0...v3.15.0](https://github.com/openai/openai-go/compare/v3.14.0...v3.15.0)
+
+### Bug Fixes
+
+* rebuild ([8205ae7](https://github.com/openai/openai-go/commit/8205ae7c00de1bd4a543381ba61b34f9b5676eda))
+
+
+### Chores
+
+* add float64 to valid types for RegisterFieldValidator ([e67d89d](https://github.com/openai/openai-go/commit/e67d89d39bc14af7309df702592ae152d1dfd60b))
+
+## 3.14.0 (2025-12-16)
+
+Full Changelog: [v3.13.0...v3.14.0](https://github.com/openai/openai-go/compare/v3.13.0...v3.14.0)
+
+### Features
+
+* **api:** gpt-image-1.5 ([6102f02](https://github.com/openai/openai-go/commit/6102f029e7ccbffe1dcf4d53b38f7da49dfbdbaa))
+
+## 3.13.0 (2025-12-15)
+
+Full Changelog: [v3.12.0...v3.13.0](https://github.com/openai/openai-go/compare/v3.12.0...v3.13.0)
+
+### Features
+
+* **api:** api update ([20b5112](https://github.com/openai/openai-go/commit/20b51126dc55b5fa357ae848593873d46514d820))
+* **api:** fix grader input list, add dated slugs for sora-2 ([e8f0b76](https://github.com/openai/openai-go/commit/e8f0b76c55abdcca2920372f74e08621d8a530b9))
+
+
+### Bug Fixes
+
+* **azure:** correct Azure OpenAI API URL construction and auth ([3ba3736](https://github.com/openai/openai-go/commit/3ba3736c4b1a6138c05df5ccb64944a3dca6ea74))
+
 ## 3.12.0 (2025-12-11)
 
 Full Changelog: [v3.11.0...v3.12.0](https://github.com/openai/openai-go/compare/v3.11.0...v3.12.0)
