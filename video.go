@@ -51,7 +51,6 @@ func (r *VideoService) New(ctx context.Context, body VideoNewParams, opts ...opt
 	return
 }
 
-
 // Create Video and Poll for Completion
 //
 // Polls the API and blocks until the task is complete.
@@ -206,8 +205,11 @@ const (
 	VideoStatusFailed     VideoStatus = "failed"
 )
 
+// An error that occurred while generating the response.
 type VideoCreateError struct {
-	Code    string `json:"code,required"`
+	// A machine-readable error code that was returned.
+	Code string `json:"code,required"`
+	// A human-readable description of the error that was returned.
 	Message string `json:"message,required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {

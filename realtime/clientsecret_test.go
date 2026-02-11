@@ -70,7 +70,7 @@ func TestClientSecretNewWithOptionalParams(t *testing.T) {
 							},
 						},
 						Speed: openai.Float(0.25),
-						Voice: realtime.RealtimeAudioConfigOutputVoiceAlloy,
+						Voice: realtime.RealtimeAudioConfigOutputVoiceAsh,
 					},
 				},
 				Include:      []string{"item.input_audio_transcription.logprobs"},
