@@ -47,7 +47,8 @@ func NewSkillVersionService(opts ...option.RequestOption) (r SkillVersionService
 
 // Create a new immutable skill version.
 func (r *SkillVersionService) New(ctx context.Context, skillID string, body SkillVersionNewParams, opts ...option.RequestOption) (res *SkillVersion, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	if skillID == "" {
 		err = errors.New("missing required skill_id parameter")
 		return nil, err
@@ -59,7 +60,8 @@ func (r *SkillVersionService) New(ctx context.Context, skillID string, body Skil
 
 // Get a specific skill version.
 func (r *SkillVersionService) Get(ctx context.Context, skillID string, version string, opts ...option.RequestOption) (res *SkillVersion, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	if skillID == "" {
 		err = errors.New("missing required skill_id parameter")
 		return nil, err
@@ -76,7 +78,8 @@ func (r *SkillVersionService) Get(ctx context.Context, skillID string, version s
 // List skill versions for a skill.
 func (r *SkillVersionService) List(ctx context.Context, skillID string, query SkillVersionListParams, opts ...option.RequestOption) (res *pagination.CursorPage[SkillVersion], err error) {
 	var raw *http.Response
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if skillID == "" {
 		err = errors.New("missing required skill_id parameter")
@@ -102,7 +105,8 @@ func (r *SkillVersionService) ListAutoPaging(ctx context.Context, skillID string
 
 // Delete a skill version.
 func (r *SkillVersionService) Delete(ctx context.Context, skillID string, version string, opts ...option.RequestOption) (res *DeletedSkillVersion, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	if skillID == "" {
 		err = errors.New("missing required skill_id parameter")
 		return nil, err
@@ -119,7 +123,7 @@ func (r *SkillVersionService) Delete(ctx context.Context, skillID string, versio
 type DeletedSkillVersion struct {
 	ID      string                       `json:"id" api:"required"`
 	Deleted bool                         `json:"deleted" api:"required"`
-	Object  constant.SkillVersionDeleted `json:"object" api:"required"`
+	Object  constant.SkillVersionDeleted `json:"object" default:"skill.version.deleted"`
 	// The deleted skill version.
 	Version string `json:"version" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -143,13 +147,13 @@ type SkillVersion struct {
 	// Unique identifier for the skill version.
 	ID string `json:"id" api:"required"`
 	// Unix timestamp (seconds) for when the version was created.
-	CreatedAt int64 `json:"created_at" api:"required"`
+	CreatedAt int64 `json:"created_at" api:"required" format:"unixtime"`
 	// Description of the skill version.
 	Description string `json:"description" api:"required"`
 	// Name of the skill version.
 	Name string `json:"name" api:"required"`
 	// The object type, which is `skill.version`.
-	Object constant.SkillVersion `json:"object" api:"required"`
+	Object constant.SkillVersion `json:"object" default:"skill.version"`
 	// Identifier of the skill for this version.
 	SkillID string `json:"skill_id" api:"required"`
 	// Version number for this skill.
@@ -184,7 +188,7 @@ type SkillVersionList struct {
 	// The ID of the last item in the list.
 	LastID string `json:"last_id" api:"required"`
 	// The type of object returned, must be `list`.
-	Object constant.List `json:"object" api:"required"`
+	Object constant.List `json:"object" default:"list"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Data        respjson.Field

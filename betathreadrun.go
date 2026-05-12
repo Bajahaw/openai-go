@@ -54,7 +54,8 @@ func NewBetaThreadRunService(opts ...option.RequestOption) (r BetaThreadRunServi
 //
 // Deprecated: The Assistants API is deprecated in favor of the Responses API
 func (r *BetaThreadRunService) New(ctx context.Context, threadID string, params BetaThreadRunNewParams, opts ...option.RequestOption) (res *Run, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	if threadID == "" {
 		err = errors.New("missing required thread_id parameter")
@@ -73,7 +74,8 @@ func (r *BetaThreadRunService) NewStreaming(ctx context.Context, threadID string
 		raw *http.Response
 		err error
 	)
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	opts = append(opts, option.WithJSONSet("stream", true))
 	if threadID == "" {
@@ -89,7 +91,8 @@ func (r *BetaThreadRunService) NewStreaming(ctx context.Context, threadID string
 //
 // Deprecated: The Assistants API is deprecated in favor of the Responses API
 func (r *BetaThreadRunService) Get(ctx context.Context, threadID string, runID string, opts ...option.RequestOption) (res *Run, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	if threadID == "" {
 		err = errors.New("missing required thread_id parameter")
@@ -108,7 +111,8 @@ func (r *BetaThreadRunService) Get(ctx context.Context, threadID string, runID s
 //
 // Deprecated: The Assistants API is deprecated in favor of the Responses API
 func (r *BetaThreadRunService) Update(ctx context.Context, threadID string, runID string, body BetaThreadRunUpdateParams, opts ...option.RequestOption) (res *Run, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	if threadID == "" {
 		err = errors.New("missing required thread_id parameter")
@@ -128,7 +132,8 @@ func (r *BetaThreadRunService) Update(ctx context.Context, threadID string, runI
 // Deprecated: The Assistants API is deprecated in favor of the Responses API
 func (r *BetaThreadRunService) List(ctx context.Context, threadID string, query BetaThreadRunListParams, opts ...option.RequestOption) (res *pagination.CursorPage[Run], err error) {
 	var raw *http.Response
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2"), option.WithResponseInto(&raw)}, opts...)
 	if threadID == "" {
 		err = errors.New("missing required thread_id parameter")
@@ -158,7 +163,8 @@ func (r *BetaThreadRunService) ListAutoPaging(ctx context.Context, threadID stri
 //
 // Deprecated: The Assistants API is deprecated in favor of the Responses API
 func (r *BetaThreadRunService) Cancel(ctx context.Context, threadID string, runID string, opts ...option.RequestOption) (res *Run, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	if threadID == "" {
 		err = errors.New("missing required thread_id parameter")
@@ -180,7 +186,8 @@ func (r *BetaThreadRunService) Cancel(ctx context.Context, threadID string, runI
 //
 // Deprecated: The Assistants API is deprecated in favor of the Responses API
 func (r *BetaThreadRunService) SubmitToolOutputs(ctx context.Context, threadID string, runID string, body BetaThreadRunSubmitToolOutputsParams, opts ...option.RequestOption) (res *Run, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	if threadID == "" {
 		err = errors.New("missing required thread_id parameter")
@@ -206,7 +213,8 @@ func (r *BetaThreadRunService) SubmitToolOutputsStreaming(ctx context.Context, t
 		raw *http.Response
 		err error
 	)
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	opts = append(opts, option.WithJSONSet("stream", true))
 	if threadID == "" {
@@ -233,7 +241,7 @@ type RequiredActionFunctionToolCall struct {
 	Function RequiredActionFunctionToolCallFunction `json:"function" api:"required"`
 	// The type of tool call the output is required for. For now, this is always
 	// `function`.
-	Type constant.Function `json:"type" api:"required"`
+	Type constant.Function `json:"type" default:"function"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID          respjson.Field
@@ -281,15 +289,15 @@ type Run struct {
 	// execution of this run.
 	AssistantID string `json:"assistant_id" api:"required"`
 	// The Unix timestamp (in seconds) for when the run was cancelled.
-	CancelledAt int64 `json:"cancelled_at" api:"required"`
+	CancelledAt int64 `json:"cancelled_at" api:"required" format:"unixtime"`
 	// The Unix timestamp (in seconds) for when the run was completed.
-	CompletedAt int64 `json:"completed_at" api:"required"`
+	CompletedAt int64 `json:"completed_at" api:"required" format:"unixtime"`
 	// The Unix timestamp (in seconds) for when the run was created.
-	CreatedAt int64 `json:"created_at" api:"required"`
+	CreatedAt int64 `json:"created_at" api:"required" format:"unixtime"`
 	// The Unix timestamp (in seconds) for when the run will expire.
-	ExpiresAt int64 `json:"expires_at" api:"required"`
+	ExpiresAt int64 `json:"expires_at" api:"required" format:"unixtime"`
 	// The Unix timestamp (in seconds) for when the run failed.
-	FailedAt int64 `json:"failed_at" api:"required"`
+	FailedAt int64 `json:"failed_at" api:"required" format:"unixtime"`
 	// Details on why the run is incomplete. Will be `null` if the run is not
 	// incomplete.
 	IncompleteDetails RunIncompleteDetails `json:"incomplete_details" api:"required"`
@@ -317,7 +325,7 @@ type Run struct {
 	// this run.
 	Model string `json:"model" api:"required"`
 	// The object type, which is always `thread.run`.
-	Object constant.ThreadRun `json:"object" api:"required"`
+	Object constant.ThreadRun `json:"object" default:"thread.run"`
 	// Whether to enable
 	// [parallel function calling](https://platform.openai.com/docs/guides/function-calling#configuring-parallel-function-calling)
 	// during tool use.
@@ -347,7 +355,7 @@ type Run struct {
 	// max context length.
 	ResponseFormat AssistantResponseFormatOptionUnion `json:"response_format" api:"required"`
 	// The Unix timestamp (in seconds) for when the run was started.
-	StartedAt int64 `json:"started_at" api:"required"`
+	StartedAt int64 `json:"started_at" api:"required" format:"unixtime"`
 	// The status of the run, which can be either `queued`, `in_progress`,
 	// `requires_action`, `cancelling`, `cancelled`, `failed`, `completed`,
 	// `incomplete`, or `expired`.
@@ -471,7 +479,7 @@ type RunRequiredAction struct {
 	// Details on the tool outputs needed for this run to continue.
 	SubmitToolOutputs RunRequiredActionSubmitToolOutputs `json:"submit_tool_outputs" api:"required"`
 	// For now, this is always `submit_tool_outputs`.
-	Type constant.SubmitToolOutputs `json:"type" api:"required"`
+	Type constant.SubmitToolOutputs `json:"type" default:"submit_tool_outputs"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		SubmitToolOutputs respjson.Field
@@ -839,7 +847,7 @@ func NewBetaThreadRunNewParamsAdditionalMessageAttachmentToolFileSearch() BetaTh
 // [NewBetaThreadRunNewParamsAdditionalMessageAttachmentToolFileSearch].
 type BetaThreadRunNewParamsAdditionalMessageAttachmentToolFileSearch struct {
 	// The type of tool being defined: `file_search`
-	Type constant.FileSearch `json:"type" api:"required"`
+	Type constant.FileSearch `json:"type" default:"file_search"`
 	paramObj
 }
 

@@ -47,7 +47,8 @@ func NewVectorStoreService(opts ...option.RequestOption) (r VectorStoreService) 
 
 // Create a vector store.
 func (r *VectorStoreService) New(ctx context.Context, body VectorStoreNewParams, opts ...option.RequestOption) (res *VectorStore, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	path := "vector_stores"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -56,7 +57,8 @@ func (r *VectorStoreService) New(ctx context.Context, body VectorStoreNewParams,
 
 // Retrieves a vector store.
 func (r *VectorStoreService) Get(ctx context.Context, vectorStoreID string, opts ...option.RequestOption) (res *VectorStore, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	if vectorStoreID == "" {
 		err = errors.New("missing required vector_store_id parameter")
@@ -69,7 +71,8 @@ func (r *VectorStoreService) Get(ctx context.Context, vectorStoreID string, opts
 
 // Modifies a vector store.
 func (r *VectorStoreService) Update(ctx context.Context, vectorStoreID string, body VectorStoreUpdateParams, opts ...option.RequestOption) (res *VectorStore, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	if vectorStoreID == "" {
 		err = errors.New("missing required vector_store_id parameter")
@@ -83,7 +86,8 @@ func (r *VectorStoreService) Update(ctx context.Context, vectorStoreID string, b
 // Returns a list of vector stores.
 func (r *VectorStoreService) List(ctx context.Context, query VectorStoreListParams, opts ...option.RequestOption) (res *pagination.CursorPage[VectorStore], err error) {
 	var raw *http.Response
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2"), option.WithResponseInto(&raw)}, opts...)
 	path := "vector_stores"
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -105,7 +109,8 @@ func (r *VectorStoreService) ListAutoPaging(ctx context.Context, query VectorSto
 
 // Delete a vector store.
 func (r *VectorStoreService) Delete(ctx context.Context, vectorStoreID string, opts ...option.RequestOption) (res *VectorStoreDeleted, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	if vectorStoreID == "" {
 		err = errors.New("missing required vector_store_id parameter")
@@ -120,7 +125,8 @@ func (r *VectorStoreService) Delete(ctx context.Context, vectorStoreID string, o
 // filter.
 func (r *VectorStoreService) Search(ctx context.Context, vectorStoreID string, body VectorStoreSearchParams, opts ...option.RequestOption) (res *pagination.Page[VectorStoreSearchResponse], err error) {
 	var raw *http.Response
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2"), option.WithResponseInto(&raw)}, opts...)
 	if vectorStoreID == "" {
 		err = errors.New("missing required vector_store_id parameter")
@@ -158,7 +164,7 @@ func NewAutoFileChunkingStrategyParam() AutoFileChunkingStrategyParam {
 // [NewAutoFileChunkingStrategyParam].
 type AutoFileChunkingStrategyParam struct {
 	// Always `auto`.
-	Type constant.Auto `json:"type" api:"required"`
+	Type constant.Auto `json:"type" default:"auto"`
 	paramObj
 }
 
@@ -295,7 +301,7 @@ func init() {
 // introduced in the API.
 type OtherFileChunkingStrategyObject struct {
 	// Always `other`.
-	Type constant.Other `json:"type" api:"required"`
+	Type constant.Other `json:"type" default:"other"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Type        respjson.Field
@@ -366,7 +372,7 @@ func (r *StaticFileChunkingStrategyParam) UnmarshalJSON(data []byte) error {
 type StaticFileChunkingStrategyObject struct {
 	Static StaticFileChunkingStrategy `json:"static" api:"required"`
 	// Always `static`.
-	Type constant.Static `json:"type" api:"required"`
+	Type constant.Static `json:"type" default:"static"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Static      respjson.Field
@@ -390,7 +396,7 @@ type StaticFileChunkingStrategyObjectParam struct {
 	// Always `static`.
 	//
 	// This field can be elided, and will marshal its zero value as "static".
-	Type constant.Static `json:"type" api:"required"`
+	Type constant.Static `json:"type" default:"static"`
 	paramObj
 }
 
@@ -408,10 +414,10 @@ type VectorStore struct {
 	// The identifier, which can be referenced in API endpoints.
 	ID string `json:"id" api:"required"`
 	// The Unix timestamp (in seconds) for when the vector store was created.
-	CreatedAt  int64                 `json:"created_at" api:"required"`
+	CreatedAt  int64                 `json:"created_at" api:"required" format:"unixtime"`
 	FileCounts VectorStoreFileCounts `json:"file_counts" api:"required"`
 	// The Unix timestamp (in seconds) for when the vector store was last active.
-	LastActiveAt int64 `json:"last_active_at" api:"required"`
+	LastActiveAt int64 `json:"last_active_at" api:"required" format:"unixtime"`
 	// Set of 16 key-value pairs that can be attached to an object. This can be useful
 	// for storing additional information about the object in a structured format, and
 	// querying for objects via API or the dashboard.
@@ -422,7 +428,7 @@ type VectorStore struct {
 	// The name of the vector store.
 	Name string `json:"name" api:"required"`
 	// The object type, which is always `vector_store`.
-	Object constant.VectorStore `json:"object" api:"required"`
+	Object constant.VectorStore `json:"object" default:"vector_store"`
 	// The status of the vector store, which can be either `expired`, `in_progress`, or
 	// `completed`. A status of `completed` indicates that the vector store is ready
 	// for use.
@@ -434,7 +440,7 @@ type VectorStore struct {
 	// The expiration policy for a vector store.
 	ExpiresAfter VectorStoreExpiresAfter `json:"expires_after"`
 	// The Unix timestamp (in seconds) for when the vector store will expire.
-	ExpiresAt int64 `json:"expires_at" api:"nullable"`
+	ExpiresAt int64 `json:"expires_at" api:"nullable" format:"unixtime"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID           respjson.Field
@@ -503,7 +509,7 @@ const (
 type VectorStoreExpiresAfter struct {
 	// Anchor timestamp after which the expiration policy applies. Supported anchors:
 	// `last_active_at`.
-	Anchor constant.LastActiveAt `json:"anchor" api:"required"`
+	Anchor constant.LastActiveAt `json:"anchor" default:"last_active_at"`
 	// The number of days after the anchor time that the vector store will expire.
 	Days int64 `json:"days" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -524,7 +530,7 @@ func (r *VectorStoreExpiresAfter) UnmarshalJSON(data []byte) error {
 type VectorStoreDeleted struct {
 	ID      string                      `json:"id" api:"required"`
 	Deleted bool                        `json:"deleted" api:"required"`
-	Object  constant.VectorStoreDeleted `json:"object" api:"required"`
+	Object  constant.VectorStoreDeleted `json:"object" default:"vector_store.deleted"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID          respjson.Field
@@ -683,7 +689,7 @@ type VectorStoreNewParamsExpiresAfter struct {
 	// `last_active_at`.
 	//
 	// This field can be elided, and will marshal its zero value as "last_active_at".
-	Anchor constant.LastActiveAt `json:"anchor" api:"required"`
+	Anchor constant.LastActiveAt `json:"anchor" default:"last_active_at"`
 	paramObj
 }
 
@@ -728,7 +734,7 @@ type VectorStoreUpdateParamsExpiresAfter struct {
 	// `last_active_at`.
 	//
 	// This field can be elided, and will marshal its zero value as "last_active_at".
-	Anchor constant.LastActiveAt `json:"anchor" api:"required"`
+	Anchor constant.LastActiveAt `json:"anchor" default:"last_active_at"`
 	paramObj
 }
 

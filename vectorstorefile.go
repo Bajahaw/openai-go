@@ -44,7 +44,8 @@ func NewVectorStoreFileService(opts ...option.RequestOption) (r VectorStoreFileS
 // [File](https://platform.openai.com/docs/api-reference/files) to a
 // [vector store](https://platform.openai.com/docs/api-reference/vector-stores/object).
 func (r *VectorStoreFileService) New(ctx context.Context, vectorStoreID string, body VectorStoreFileNewParams, opts ...option.RequestOption) (res *VectorStoreFile, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	if vectorStoreID == "" {
 		err = errors.New("missing required vector_store_id parameter")
@@ -96,7 +97,8 @@ func (r *VectorStoreFileService) UploadAndPoll(ctx context.Context, vectorStoreI
 
 // Retrieves a vector store file.
 func (r *VectorStoreFileService) Get(ctx context.Context, vectorStoreID string, fileID string, opts ...option.RequestOption) (res *VectorStoreFile, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	if vectorStoreID == "" {
 		err = errors.New("missing required vector_store_id parameter")
@@ -113,7 +115,8 @@ func (r *VectorStoreFileService) Get(ctx context.Context, vectorStoreID string, 
 
 // Update attributes on a vector store file.
 func (r *VectorStoreFileService) Update(ctx context.Context, vectorStoreID string, fileID string, body VectorStoreFileUpdateParams, opts ...option.RequestOption) (res *VectorStoreFile, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	if vectorStoreID == "" {
 		err = errors.New("missing required vector_store_id parameter")
@@ -131,7 +134,8 @@ func (r *VectorStoreFileService) Update(ctx context.Context, vectorStoreID strin
 // Returns a list of vector store files.
 func (r *VectorStoreFileService) List(ctx context.Context, vectorStoreID string, query VectorStoreFileListParams, opts ...option.RequestOption) (res *pagination.CursorPage[VectorStoreFile], err error) {
 	var raw *http.Response
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2"), option.WithResponseInto(&raw)}, opts...)
 	if vectorStoreID == "" {
 		err = errors.New("missing required vector_store_id parameter")
@@ -160,7 +164,8 @@ func (r *VectorStoreFileService) ListAutoPaging(ctx context.Context, vectorStore
 // [delete file](https://platform.openai.com/docs/api-reference/files/delete)
 // endpoint.
 func (r *VectorStoreFileService) Delete(ctx context.Context, vectorStoreID string, fileID string, opts ...option.RequestOption) (res *VectorStoreFileDeleted, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2")}, opts...)
 	if vectorStoreID == "" {
 		err = errors.New("missing required vector_store_id parameter")
@@ -178,7 +183,8 @@ func (r *VectorStoreFileService) Delete(ctx context.Context, vectorStoreID strin
 // Retrieve the parsed contents of a vector store file.
 func (r *VectorStoreFileService) Content(ctx context.Context, vectorStoreID string, fileID string, opts ...option.RequestOption) (res *pagination.Page[VectorStoreFileContentResponse], err error) {
 	var raw *http.Response
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithBearerAuthSecurity()}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("OpenAI-Beta", "assistants=v2"), option.WithResponseInto(&raw)}, opts...)
 	if vectorStoreID == "" {
 		err = errors.New("missing required vector_store_id parameter")
@@ -211,12 +217,12 @@ type VectorStoreFile struct {
 	// The identifier, which can be referenced in API endpoints.
 	ID string `json:"id" api:"required"`
 	// The Unix timestamp (in seconds) for when the vector store file was created.
-	CreatedAt int64 `json:"created_at" api:"required"`
+	CreatedAt int64 `json:"created_at" api:"required" format:"unixtime"`
 	// The last error associated with this vector store file. Will be `null` if there
 	// are no errors.
 	LastError VectorStoreFileLastError `json:"last_error" api:"required"`
 	// The object type, which is always `vector_store.file`.
-	Object constant.VectorStoreFile `json:"object" api:"required"`
+	Object constant.VectorStoreFile `json:"object" default:"vector_store.file"`
 	// The status of the vector store file, which can be either `in_progress`,
 	// `completed`, `cancelled`, or `failed`. The status `completed` indicates that the
 	// vector store file is ready for use.
@@ -344,7 +350,7 @@ func (r *VectorStoreFileAttributeUnion) UnmarshalJSON(data []byte) error {
 type VectorStoreFileDeleted struct {
 	ID      string                          `json:"id" api:"required"`
 	Deleted bool                            `json:"deleted" api:"required"`
-	Object  constant.VectorStoreFileDeleted `json:"object" api:"required"`
+	Object  constant.VectorStoreFileDeleted `json:"object" default:"vector_store.file.deleted"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID          respjson.Field
@@ -384,7 +390,9 @@ func (r *VectorStoreFileContentResponse) UnmarshalJSON(data []byte) error {
 type VectorStoreFileNewParams struct {
 	// A [File](https://platform.openai.com/docs/api-reference/files) ID that the
 	// vector store should use. Useful for tools like `file_search` that can access
-	// files.
+	// files. For multi-file ingestion, we recommend
+	// [`file_batches`](https://platform.openai.com/docs/api-reference/vector-stores-file-batches/createBatch)
+	// to minimize per-vector-store write requests.
 	FileID string `json:"file_id" api:"required"`
 	// Set of 16 key-value pairs that can be attached to an object. This can be useful
 	// for storing additional information about the object in a structured format, and
